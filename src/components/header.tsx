@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { PawIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { Menu, PlusCircle, User, LogOut, LayoutDashboard, Loader2, Database } from 'lucide-react';
+import { Menu, PlusCircle, User, LogOut, LayoutDashboard, Loader2, Database , Bell } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
@@ -77,12 +77,12 @@ export function Header() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 <span>Add Listing</span>
               </DropdownMenuItem>
-              {isAdmin && (
-                <DropdownMenuItem onClick={() => router.push('/admin')}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Admin Panel</span>
+             
+                <DropdownMenuItem onClick={() => router.push('/notification')}>
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>Notifications</span>
                 </DropdownMenuItem>
-              )}
+              
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
@@ -164,11 +164,11 @@ export function Header() {
                                <Button asChild variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={closeSheet}>
                                     <Link href="/add-listing"><PlusCircle className="mr-2 h-5 w-5"/>Add Listing</Link>
                                </Button>
-                               {/* {isAdmin && (
+                               
                                   <Button asChild variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={closeSheet}>
-                                      <Link href="/admin"><LayoutDashboard className="mr-2 h-5 w-5"/>Admin Panel</Link>
+                                      <Link href="/notification"><Bell className="mr-2 h-5 w-5"/>Notification</Link>
                                   </Button>
-                               )} */}
+                               
                                <Button variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={() => { closeSheet(); handleLogout(); }}>
                                     <LogOut className="mr-2 h-5 w-5"/>Logout
                                 </Button>

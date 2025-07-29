@@ -78,13 +78,50 @@ export default function CheckoutPage() {
     }
   }, [petId, toast]);
 
-  const handleConfirmPurchase = () => {
-    toast({
-        title: "Purchase Confirmed!",
-        description: `Your request for ${pet?.name} has been submitted. The seller will contact you shortly.`,
-    })
-    router.push(`/pets/${petId}`);
-  }
+  const handleConfirmPurchase = async () => {
+    // Note: Ensure 'pet', 'user', and 'petId' are available in your component's state or props.
+    if (!pet || !user || !petId) {
+        toast({
+            title: "Error",
+            description: "Missing required information to complete the purchase.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    try {
+        // Call your API endpoint to create the notification
+        const response = await fetch(`/api/users/${pet.ownerId}/notifications`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: `${user.name} is interested in purchasing ${pet.name}. his email is ${user.email}`,
+                fromUserId: user.id, // The ID of the current logged-in user (buyer)
+                petId: petId,
+            }),
+        });
+        console.log(user)
+        if (!response.ok) {
+            // Throw an error if the API call fails
+            throw new Error("Failed to send notification.");
+        }
+
+        // If successful, show the confirmation toast and redirect
+        toast({
+            title: "Purchase Confirmed!",
+            description: `Your request for ${pet.name} has been sent. The seller will be notified.`,
+        });
+        router.push(`/pets/${petId}`);
+
+    } catch (error) {
+        console.error("Error confirming purchase:", error);
+        toast({
+            title: "Something went wrong",
+            description: "Could not complete your purchase request. Please try again.",
+            variant: "destructive",
+        });
+    }
+  };
 
   if (isAuthLoading || isPetLoading) {
     return (
