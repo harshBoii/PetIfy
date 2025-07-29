@@ -29,7 +29,7 @@ export function PostCard({ post }: PostCardProps) {
 
     useEffect(() => {
         if (user) {
-            setIsLiked(post.likes?.includes(user.uid) ?? false);
+            setIsLiked(post.likes?.includes(user.id) ?? false);
         } else {
             setIsLiked(false);
         }
@@ -62,7 +62,7 @@ export function PostCard({ post }: PostCardProps) {
                 },
                 body: JSON.stringify({
                     action: 'like',
-                    userId: user.uid
+                    userId: user.id
                 })
             });
             
@@ -87,7 +87,7 @@ export function PostCard({ post }: PostCardProps) {
 
         const commentData = {
             author: profile.displayName,
-            authorId: user.uid,
+            authorId: user.id,
             avatar: user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${profile.displayName}`,
             text: newComment.trim(),
         };
@@ -107,7 +107,7 @@ export function PostCard({ post }: PostCardProps) {
                 },
                 body: JSON.stringify({
                     action: 'comment',
-                    userId: user.uid,
+                    userId: user.id,
                     comment: commentData
                 })
             });

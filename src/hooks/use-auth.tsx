@@ -102,7 +102,8 @@
 
 // context/AuthContext.js
 
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useContext,useEffect, useMemo } from 'react';
+
 
 // 1. Create the Auth Context
 const AuthContext = createContext(null);
@@ -112,6 +113,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (err) {
+      console.error("Failed to parse user from localStorage", err);
+      setUser(null); // Clear state if data is corrupted
+    } finally {
+      setIsLoading(false); // Stop loading after the initial check
+    }
+  }, []); // The empty array [] ensures this runs only once on mount
+
 
   /**
    * Logs in the user by calling the /api/login endpoint.
@@ -132,6 +149,10 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
+
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user)); // localStorage only stores strings
+
 
       if (!response.ok) {
         // Throw an error with the message from the API
@@ -157,6 +178,9 @@ export const AuthProvider = ({ children }) => {
    */
   const logout = () => {
     // In a real app, you'd also invalidate a session/token on the server
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+
     setUser(null);
     setError(null);
   };

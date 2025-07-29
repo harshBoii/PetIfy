@@ -3,6 +3,7 @@
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 
 /**
  * @swagger
@@ -74,9 +75,18 @@ export async function POST(request: { json: () => PromiseLike<{ email: any; pass
 
     // --- Send Success Response ---
     // In a real-world application, you would generate a JWT or session token here.
+    const JWT_SECRET = process.env.JWT_SECRET;
+    const token = jwt.sign(
+        { userId: existingUser._id, email: existingUser.email }, 
+        JWT_SECRET, 
+        { expiresIn: '1d' }
+    );
+    
+
     console.log(existingUser.name)
     return NextResponse.json({
         message: 'Login successful!',
+        token: token, // Send the token to the client
         user: {
             id: existingUser._id,
             email: existingUser.email,

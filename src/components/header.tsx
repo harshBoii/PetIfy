@@ -33,13 +33,15 @@ export function Header() {
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const closeSheet = () => setIsSheetOpen(false);
 
+  const {logout} = useAuth()
+
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout(); ;
     toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
     });
-    router.push('/');
+    router.push('/login');
   }
 
   const AuthNav = () => {
@@ -162,11 +164,11 @@ export function Header() {
                                <Button asChild variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={closeSheet}>
                                     <Link href="/add-listing"><PlusCircle className="mr-2 h-5 w-5"/>Add Listing</Link>
                                </Button>
-                               {isAdmin && (
+                               {/* {isAdmin && (
                                   <Button asChild variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={closeSheet}>
                                       <Link href="/admin"><LayoutDashboard className="mr-2 h-5 w-5"/>Admin Panel</Link>
                                   </Button>
-                               )}
+                               )} */}
                                <Button variant="ghost" className="w-full justify-start text-lg h-auto py-3" onClick={() => { closeSheet(); handleLogout(); }}>
                                     <LogOut className="mr-2 h-5 w-5"/>Logout
                                 </Button>
