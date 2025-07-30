@@ -3,11 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import type { Pet } from '@/lib/placeholder-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Dog, Mail, LogOut } from 'lucide-react';
 import { PetCard } from '@/components/pet-card';
@@ -26,26 +24,38 @@ export default function ProfilePage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        if (!user?.uid) {
+        // Exit if there is no user ID
+        if (!user?.id) {
             setIsPetsLoading(false);
             return;
+        }
+
+        // Define an async function to fetch pets from the API
+        const fetchUserPets = async () => {
+            setIsPetsLoading(true);
+            try {
+                // Fetch pets specifically for the logged-in user via a query parameter
+                const response = await fetch(`/api/pets?ownerId=${user.id}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user listings');
+                }
+
+                const data = await response.json();
+                // Assuming the API returns an object like { pets: [...] }
+                setUserPets(data.pets || []);
+
+            } catch (error) {
+                console.error("Error fetching user pets from API:", error);
+                setUserPets([]); // Clear pets on error to avoid showing stale data
+            } finally {
+                setIsPetsLoading(false);
+            }
         };
 
-        setIsPetsLoading(true);
-        const petsCollection = collection(db, 'pets');
-        const q = query(petsCollection, where("ownerId", "==", user.uid));
-        
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Pet[];
-            setUserPets(petsData);
-            setIsPetsLoading(false);
-        }, (error) => {
-            console.error("Error fetching user pets:", error);
-            setIsPetsLoading(false);
-        });
+        fetchUserPets();
 
-        return () => unsubscribe();
-    }, [user?.uid]);
+    }, [user?.id]); // This effect re-runs when the user ID changes
 
     const handleLogout = async () => {
         await signOut(auth);
@@ -104,7 +114,7 @@ export default function ProfilePage() {
                     ) : userPets.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {userPets.map(pet => (
-                                <PetCard key={pet.id} pet={pet} />
+                                <PetCard key={pet.id || pet._id?.toString()} pet={pet} />
                             ))}
                         </div>
                     ) : (
@@ -120,3 +130,4 @@ export default function ProfilePage() {
         </AuthRequired>
     );
 }
+

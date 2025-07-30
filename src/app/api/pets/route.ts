@@ -5,15 +5,27 @@ import { Readable } from 'stream';
 import { Pet } from '@/lib/placeholder-data';
 
 // GET all pets (already exists)
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const client = await getClient;
     const db = client.db();
+    
+    // Get URL search parameters from the request
+    const { searchParams } = new URL(req.url);
+    const ownerId = searchParams.get('ownerId');
+
+    // If an ownerId is provided, create a query to filter by it.
+    // Otherwise, the empty query {} will match all documents.
+    const query = ownerId ? { ownerId: ownerId } : {};
+
+    // Find documents in the 'pets' collection matching the query
     const pets = await db.collection<Pet>('pets')
-      .find({})
+      .find(query)
       .sort({ createdAt: -1 })
       .toArray();
+      
     return NextResponse.json({ pets });
+
   } catch (error) {
     console.error('Failed to fetch pets:', error);
     return NextResponse.json(
