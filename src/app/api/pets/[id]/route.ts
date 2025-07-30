@@ -134,7 +134,7 @@ export async function PUT(
     )
 
     if (result.matchedCount === 0) {
-      return NextResponse.json({ error: 'Not Found' }, { status: 424 })
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
     }
 
     return NextResponse.json({ message: 'Pet updated successfully' })

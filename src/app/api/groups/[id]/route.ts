@@ -38,3 +38,47 @@ export async function GET(request: Request, context: { params: { id: string } })
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const client = await getClient;
+    const db = client.db('test');
+    const { id } = params;
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Invalid group ID format' },
+        { status: 400 }
+      );
+    }
+
+    const groupId = new ObjectId(id);
+    const deleteResult = await db
+      .collection('groups')
+      .deleteOne({ _id: groupId });
+
+    if (deleteResult.deletedCount === 0) {
+      return NextResponse.json(
+        { message: 'Group not found or already deleted' },
+        { status: 404 }
+      );
+    }
+
+    // Cascade delete messages
+    await db.collection('messages').deleteMany({ groupId });
+
+    return NextResponse.json(
+      { message: 'Group and associated messages deleted successfully' },
+      { status: 200 }
+    );
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json(
+      { message: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
